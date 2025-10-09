@@ -12,7 +12,7 @@ class Atualizacao(models.Model):
     status = models.CharField(max_length=1, choices=StatusAtualizacao)
 
     class Meta:
-        db_table = 'atualizacoes'
+        db_table = 'atualizacao'
         verbose_name = 'Atualização'
         verbose_name_plural = 'Atualizações'
         ordering = ['-data']
