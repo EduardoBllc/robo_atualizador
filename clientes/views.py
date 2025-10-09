@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -5,9 +6,9 @@ import requests
 
 from clientes.models import Cliente
 from clientes.serializer import ClienteSerializer
+from clientes.services import envia_cadastro_cliente_central, cadastra_cliente
 
 
-# Create your views here.
 class ClientesView(APIView):
 
     def get(self, request):
@@ -19,29 +20,12 @@ class ClientesView(APIView):
         serializer = ClienteSerializer(data=request.data)
 
         if serializer.is_valid():
-            dados_serializados = serializer.validated_data
-
-            # Realizar requisição de status para garantir que o cliente está acessível
-            protocolo = 'https:' if dados_serializados['usa_tls'] else 'http:'
-            url = f'{protocolo}//{dados_serializados["ip"]}:{dados_serializados["porta"]}/status/'
-
-            try:
-                res = requests.get(url, timeout=5)
-                if res.status_code != 200:
-                    raise Exception('Status code diferente de 200')
-                status_ok = res.json().get('ok', False)
-            except Exception as e:
-                status_ok = False
-
-            if status_ok:
-                instance = serializer.save()
-                status_res = status.HTTP_201_CREATED
-                resposta = {'message': 'Cliente cadastrado com sucesso.', 'cliente_id': instance.id}
+            if settings.SERVIDOR_CENTRAL:
+                status_res, resposta = cadastra_cliente(serializer)
             else:
-                status_res = status.HTTP_400_BAD_REQUEST
-                resposta = {'error': 'Não foi possível acessar clietne.'}
+                status_res, resposta = envia_cadastro_cliente_central(serializer)
         else:
             status_res = status.HTTP_400_BAD_REQUEST
-            resposta = {'error': 'Dados inválidos.', 'details': serializer.errors }
+            resposta = {'error': 'Dados inválidos.', 'details': serializer.errors}
 
         return Response(resposta, status=status_res)

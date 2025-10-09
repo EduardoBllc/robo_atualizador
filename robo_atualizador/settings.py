@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -39,7 +41,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "status.apps.StatusConfig",
     "clientes.apps.ClientesConfig",
-    "atualizacao.apps.AtualizacaoConfig"
+    "atualizacao.apps.AtualizacaoConfig",
+    "aplicacao.apps.AplicacaoConfig"
 ]
 
 MIDDLEWARE = [
@@ -124,4 +127,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ATUALIZADOR_MESTRE = int(os.environ.get('ATUALIZADOR_MESTRE', '0')) == 1
+try:
+    SERVIDOR_CENTRAL = int(os.environ.get('SERVIDOR_CENTRAL', '0')) == 1
+except ValueError:
+    SERVIDOR_CENTRAL = False
+    print("Variável de ambiente SERVIDOR_CENTRAL inválida.\n"
+          f"Deveria ser 0 ou 1, porém é: {os.environ.get('SERVIDOR_CENTRAL')}\n" 
+          "Usando valor padrão False.\n")
+
+if not SERVIDOR_CENTRAL:
+    IP_CENTRAL = os.environ.get('IP_CENTRAL')
+    PORTA_CENTRAL = os.environ.get('PORTA_CENTRAL')
+    CENTRAL_USA_TLS = int(os.environ.get('CENTRAL_USA_TLS', '0')) == 1
+
+    if not IP_CENTRAL or not PORTA_CENTRAL:
+        raise Exception("Variáveis de ambiente IP_CENTRAL e PORTA_CENTRAL são obrigatórias para aplicações.")

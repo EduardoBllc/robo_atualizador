@@ -13,4 +13,6 @@ class Atualizacao(models.Model):
 
     class Meta:
         db_table = 'atualizacoes'
+        verbose_name = 'Atualização'
+        verbose_name_plural = 'Atualizações'
         ordering = ['-data']

@@ -6,4 +6,4 @@ from clientes.models import Cliente
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
-        fields = '__all__'
+        exclude = ['data_cadastro', 'data_alteracao']

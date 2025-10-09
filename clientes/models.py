@@ -6,9 +6,13 @@ class Cliente(models.Model):
     ip = models.GenericIPAddressField()
     porta = models.IntegerField()
     usa_tls = models.BooleanField(default=False)
+    data_cadastro = models.DateTimeField(auto_now_add=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'clientes'
+        verbose_name = 'Cliente'
+        verbose_name_plural = 'Clientes'
         unique_together = ('ip', 'porta')
         ordering = ['id']
 
@@ -16,3 +20,7 @@ class Cliente(models.Model):
     def url_base(self):
         protocolo = 'https:' if self.usa_tls else 'http:'
         return f'{protocolo}//{self.ip}:{self.porta}'
+
+    @property
+    def ipaddr_host(self):
+        return f'{self.ip}:{self.porta}'
