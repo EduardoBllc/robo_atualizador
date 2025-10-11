@@ -2,7 +2,7 @@ from django.db import models
 
 # Modelo que representa um servidor cliente, que ficar "escutando" esperando por atualizações do projeto para atualizar
 class Cliente(models.Model):
-    descricao = models.TextField(max_length=500)
+    nome = models.CharField(max_length=100)
     ip = models.GenericIPAddressField()
     porta = models.IntegerField()
     usa_tls = models.BooleanField(default=False)
@@ -10,7 +10,7 @@ class Cliente(models.Model):
     data_alteracao = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'clientes'
+        db_table = 'cliente'
         verbose_name = 'Cliente'
         verbose_name_plural = 'Clientes'
         unique_together = ('ip', 'porta')
@@ -19,8 +19,11 @@ class Cliente(models.Model):
     @property
     def url_base(self):
         protocolo = 'https:' if self.usa_tls else 'http:'
-        return f'{protocolo}//{self.ip}:{self.porta}'
+        return f'{protocolo}//{self.ipaddr_host}'
 
     @property
     def ipaddr_host(self):
         return f'{self.ip}:{self.porta}'
+
+    def __str__(self):
+        return f'{self.nome} ({self.ip}:{self.porta})'

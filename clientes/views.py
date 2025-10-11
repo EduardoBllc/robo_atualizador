@@ -6,7 +6,7 @@ import requests
 
 from clientes.models import Cliente
 from clientes.serializer import ClienteSerializer
-from clientes.services import envia_cadastro_cliente_central, cadastra_cliente
+from clientes.services import solicita_cadastro_central, cadastra_cliente
 
 
 class ClientesView(APIView):
@@ -23,7 +23,7 @@ class ClientesView(APIView):
             if settings.SERVIDOR_CENTRAL:
                 status_res, resposta = cadastra_cliente(serializer)
             else:
-                status_res, resposta = envia_cadastro_cliente_central(serializer)
+                status_res, resposta = solicita_cadastro_central(serializer)
         else:
             status_res = status.HTTP_400_BAD_REQUEST
             resposta = {'error': 'Dados inválidos.', 'details': serializer.errors}

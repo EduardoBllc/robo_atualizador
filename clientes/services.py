@@ -8,11 +8,11 @@ from clientes.serializer import ClienteSerializer
 from utils.objects import Central
 
 
-def envia_cadastro_cliente_central(serializer: ClienteSerializer):
+def solicita_cadastro_central(serializer: ClienteSerializer):
     # Chamar API da central para cadastrar o cliente
     url = Central.get_url_base() + '/cliente/'
     body = {
-        "descricao": serializer.validated_data['descricao'],
+        "nome": serializer.validated_data['nome'],
         "ip": serializer.validated_data['ip'],
         "porta": serializer.validated_data['porta'],
         "usa_tls": serializer.validated_data['usa_tls'],

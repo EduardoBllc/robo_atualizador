@@ -1,9 +1,9 @@
 from django.db import models
+import git
 
 class Aplicacao(models.Model):
     nome = models.CharField(max_length=100)
-    descricao = models.TextField(blank=True, null=True)
-    diretorio = models.CharField(max_length=128)
+    caminho = models.CharField(max_length=128)
     data_cadastro = models.DateTimeField(auto_now_add=True)
     data_alteracao = models.DateTimeField(auto_now=True)
     comandos = models.ManyToManyField('Comando', blank=True, related_name='aplicacoes')
@@ -14,13 +14,36 @@ class Aplicacao(models.Model):
     branch_prod = models.CharField(max_length=64, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.nome}({self.diretorio})"
+        return f"{self.nome}({self.caminho})"
 
     class Meta:
         db_table = "aplicacao"
         verbose_name = "Aplicação"
         verbose_name_plural = "Aplicações"
         ordering = ["nome"]
+
+    @property
+    def repositorio(self):
+        return git.Repo(self.caminho)
+
+    @property
+    def branch_ativa(self) -> git.Head | None:
+        try:
+            return self.repositorio.active_branch
+        except TypeError:
+            return None
+
+    @property
+    def commit_atual(self) -> git.Commit:
+        return self.repositorio.head.commit
+
+    @property
+    def data_commit_atual(self) -> str:
+        return self.commit_atual.committed_datetime.strftime('%d/%m/%Y %H:%M:%S')
+
+    @property
+    def commit_atual_formatado(self) -> str:
+        return f"{self.commit_atual.hexsha[:7]} - {self.data_commit_atual}"
 
 class Comando(models.Model):
     comando = models.CharField(max_length=300)
@@ -35,3 +58,4 @@ class Comando(models.Model):
         db_table = "comando"
         verbose_name = "Comando"
         verbose_name_plural = "Comandos"
+

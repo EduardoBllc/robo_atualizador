@@ -45,7 +45,7 @@ def atualiza_aplicacao(aplicacao: Aplicacao,
                        hash_commit: str = None,
                        auto_stash: bool = True):
 
-    diretorio_aplicacao = aplicacao.diretorio
+    diretorio_aplicacao = aplicacao.caminho
     remote = aplicacao.remote
 
     if not os.path.exists(diretorio_aplicacao):

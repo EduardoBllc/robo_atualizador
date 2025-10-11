@@ -22,14 +22,14 @@ class StatusView(APIView):
                     dados['clientes'].append({
                         'id': cliente.id,
                         'ipaddr_host': cliente.ipaddr_host,
-                        'descricao': cliente.descricao,
+                        'descricao': cliente.nome,
                         'status': res_status_cliente.json()
                     })
                 else:
                     dados['clientes'].append({
                         'id': cliente.id,
                         'ipaddr_host': cliente.ipaddr_host,
-                        'descricao': cliente.descricao,
+                        'descricao': cliente.nome,
                         'status': f'erro ({res_status_cliente.status_code})'
                     })
 
