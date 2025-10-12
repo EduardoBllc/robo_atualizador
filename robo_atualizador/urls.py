@@ -28,5 +28,6 @@ urlpatterns = [
     path('status/', StatusView.as_view(), name='status'),
     path('cliente/', ClientesView.as_view(), name='cliente'),
     path('atualizar/', AtualizacaoView.as_view(), name='atualizacao'),
-    path('aplicacao/', AplicacaoView.as_view(), name='aplicacao')
+    path('aplicacao/', AplicacaoView.as_view(), name='aplicacao'),
+    path("aplicacao/<int:pk>/", AplicacaoView.as_view(), name="aplicacao-detail"),
 ]

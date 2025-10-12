@@ -1,5 +1,6 @@
 from django.db import models
 import git
+from datetime import datetime
 
 class Aplicacao(models.Model):
     nome = models.CharField(max_length=100)
@@ -38,12 +39,12 @@ class Aplicacao(models.Model):
         return self.repositorio.head.commit
 
     @property
-    def data_commit_atual(self) -> str:
-        return self.commit_atual.committed_datetime.strftime('%d/%m/%Y %H:%M:%S')
+    def data_commit_atual(self) -> datetime:
+        return self.commit_atual.committed_datetime
 
     @property
     def commit_atual_formatado(self) -> str:
-        return f"{self.commit_atual.hexsha[:7]} - {self.data_commit_atual}"
+        return f"{self.commit_atual.hexsha[:7]} - {self.data_commit_atual.strftime('%d/%m/%Y')}"
 
 class Comando(models.Model):
     comando = models.CharField(max_length=300)
