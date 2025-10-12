@@ -7,13 +7,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
 
-from aplicacao.models import Aplicacao
-from aplicacao.serializer import AplicacaoSerializer
-from aplicacao.services import enviar_cadastro_aplicacao, cadastrar_aplicacao
+from repositorio.models import Repositorio
+from repositorio.serializer import RepositorioSerializer
+from repositorio.services import enviar_cadastro_aplicacao, cadastrar_aplicacao
 from clientes.models import Cliente
 
 
-class AplicacaoView(APIView):
+class RepositorioView(APIView):
     def get(self, request, pk=None, *args, **kwargs):
         status_res = status.HTTP_200_OK
 
@@ -22,47 +22,45 @@ class AplicacaoView(APIView):
             # e retorna um dicionário com o id do cliente como chave e a lista de aplicações como valor.
             resposta = {}
 
+            def trata_resposta_cliente(resposta_req):
+                if resposta_req.status_code == 204:
+                    return []
+                elif resposta_req.status_code < 400:
+                    return resposta_req.json()
+                else:
+                    return {'error': f'Erro ao buscar repositórios do cliente {cliente.nome}.'}
+
             if pk is None:
                 clientes = Cliente.objects.all()
 
                 for cliente in clientes:
                     res = requests.get(f'{cliente.url_base}/aplicacao/')
-                    if res.status_code == 204:
-                        resposta[cliente.id] = []
-                    elif res.status_code < 400:
-                        resposta[cliente.id] = res.json()
-                    else:
-                        resposta[cliente.id] = {'error': f'Erro ao buscar aplicações do cliente {cliente.nome}.'}
+                    resposta[cliente.id] = trata_resposta_cliente(res)
+
             else:
                 try:
                     cliente = get_object_or_404(Cliente, pk=pk)
                     res = requests.get(f'{cliente.url_base}/aplicacao/')
-                    if res.status_code == 204:
-                        resposta = []
-                        status_res = status.HTTP_204_NO_CONTENT
-                    elif res.status_code < 400:
-                        resposta = res.json()
-                    else:
-                        resposta = {'error': f'Erro ao buscar aplicações do cliente {cliente.nome}.'}
-                        status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
+                    resposta = trata_resposta_cliente(res)
+
                 except Http404:
                     resposta = {'error': 'Cliente não encontrado.'}
                     status_res = status.HTTP_404_NOT_FOUND
 
         else:
             if pk is None:
-                aplicacoes = Aplicacao.objects.all()
+                repositorio = Repositorio.objects.all()
 
-                if not aplicacoes:
+                if not repositorio:
                     resposta = []
                     status_res = status.HTTP_204_NO_CONTENT
                 else:
-                    serializer = AplicacaoSerializer(aplicacoes, many=True)
+                    serializer = RepositorioSerializer(repositorio, many=True)
                     resposta = serializer.data
             else:
                 try:
-                    aplicacao = get_object_or_404(Aplicacao, pk=pk)
-                    serializer = AplicacaoSerializer(aplicacao)
+                    aplicacao = get_object_or_404(Repositorio, pk=pk)
+                    serializer = RepositorioSerializer(aplicacao)
                     resposta = serializer.data
                 except Http404:
                     resposta = {'error': 'Aplicação não encontrada.'}
@@ -73,7 +71,7 @@ class AplicacaoView(APIView):
     def post(self, request, *args, **kwargs):
         status_res = status.HTTP_400_BAD_REQUEST
 
-        serializer = AplicacaoSerializer(data=request.data)
+        serializer = RepositorioSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
@@ -110,7 +108,7 @@ class AplicacaoView(APIView):
     def delete(self, request, pk=None, *args, **kwargs):
         try:
             assert pk is not None, 'ID da aplicação obrigatória para método delete.'
-            aplicacao = get_object_or_404(Aplicacao, pk=pk)
+            aplicacao = get_object_or_404(Repositorio, pk=pk)
             aplicacao.delete()
 
             status_res = status.HTTP_200_OK

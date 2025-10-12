@@ -2,11 +2,11 @@ import git
 import requests
 import os
 
-from aplicacao.serializer import AplicacaoSerializer
+from repositorio.serializer import RepositorioSerializer
 from clientes.models import Cliente
 
 
-def enviar_cadastro_aplicacao(serializer: AplicacaoSerializer, cliente: Cliente):
+def enviar_cadastro_aplicacao(serializer: RepositorioSerializer, cliente: Cliente):
     resposta = requests.post(
         f'{cliente.url_base}/aplicacao/',
         data=serializer.validated_data
@@ -14,7 +14,7 @@ def enviar_cadastro_aplicacao(serializer: AplicacaoSerializer, cliente: Cliente)
 
     return resposta.status_code, resposta.json()
 
-def cadastrar_aplicacao(serializer: AplicacaoSerializer):
+def cadastrar_aplicacao(serializer: RepositorioSerializer):
     dados_serializados = serializer.validated_data
 
     caminho_aplicacao = dados_serializados['caminho']

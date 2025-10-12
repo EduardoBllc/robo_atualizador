@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
-from aplicacao.models import Aplicacao
+from repositorio.models import Repositorio
 
 
-class AplicacaoSerializer(serializers.ModelSerializer):
+class RepositorioSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = Aplicacao
+        model = Repositorio
         read_only_fields = ('id', 'data_cadastro', 'data_alteracao')
 
 
-    def to_representation(self, instance: Aplicacao):
+    def to_representation(self, instance: Repositorio):
         representacao = super().to_representation(instance)
 
         representacao['ultimo_commit'] = {

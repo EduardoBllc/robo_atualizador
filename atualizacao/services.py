@@ -1,7 +1,7 @@
 import os
 import git
 
-from aplicacao.models import Aplicacao
+from repositorio.models import Repositorio
 
 def verifica_remote(repositorio: git.Repo, remote: str = 'origin') -> bool:
     try:
@@ -39,7 +39,7 @@ def alterar_branch(repositorio: git.Repo, branch: str, remote: str|git.Remote = 
             raise ValueError(f'Erro ao trocar para branch {branch}: {str(e)}')
 
 
-def atualiza_aplicacao(aplicacao: Aplicacao,
+def atualiza_aplicacao(aplicacao: Repositorio,
                        atualizar: bool = True,
                        branch: str = None,
                        hash_commit: str = None,

@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "status",
     "clientes",
     "atualizacao",
-    "aplicacao",
+    "repositorio",
 ]
 
 MIDDLEWARE = [

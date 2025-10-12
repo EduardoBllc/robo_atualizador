@@ -2,7 +2,7 @@ from django.db import models
 import git
 from datetime import datetime
 
-class Aplicacao(models.Model):
+class Repositorio(models.Model):
     nome = models.CharField(max_length=100)
     caminho = models.CharField(max_length=128)
     data_cadastro = models.DateTimeField(auto_now_add=True)
@@ -18,25 +18,25 @@ class Aplicacao(models.Model):
         return f"{self.nome}({self.caminho})"
 
     class Meta:
-        db_table = "aplicacao"
+        db_table = "repositorio"
         verbose_name = "Aplicação"
         verbose_name_plural = "Aplicações"
         ordering = ["nome"]
 
     @property
-    def repositorio(self):
+    def repositorio_git(self):
         return git.Repo(self.caminho)
 
     @property
     def branch_ativa(self) -> git.Head | None:
         try:
-            return self.repositorio.active_branch
+            return self.repositorio_git.active_branch
         except TypeError:
             return None
 
     @property
     def commit_atual(self) -> git.Commit:
-        return self.repositorio.head.commit
+        return self.repositorio_git.head.commit
 
     @property
     def data_commit_atual(self) -> datetime:
