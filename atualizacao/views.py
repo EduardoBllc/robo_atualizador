@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from repositorio.models import Repositorio
 from clientes.models import Cliente
-from atualizacao.services import atualiza_aplicacao
+from atualizacao.services import update
 
 
 class AtualizacaoView(APIView):
@@ -37,9 +37,9 @@ class AtualizacaoView(APIView):
                     print(f'Erro ao enviar atualização para {cliente.nome}: {str(e)}')
 
         else:
-            for aplicacao in Repositorio.objects.all():
-                if aplicacao.branch_ativa.name == branch:
-                    atualiza_aplicacao(aplicacao)
+            for repo in Repositorio.objects.all():
+                if repo.branch_ativa.name == branch:
+                    update(repo)
 
 
         return Response(status=status.HTTP_200_OK)

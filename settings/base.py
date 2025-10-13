@@ -1,3 +1,5 @@
+import os
+
 """
 Django settings for robo_atualizador project.
 
@@ -17,6 +19,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '.env')
+CENTRAL = os.getenv("CENTRAL_SERVICE", "0") in {"1", "true", "True", "TRUE"}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -24,12 +27,9 @@ load_dotenv(BASE_DIR / '.env')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-%k(bdf0j30o$w34x71g3%9m1i04%xd_j-gk7x$e+gs0z*3rgoz"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', '0') in {'1', 'true', 'True', 'TRUE'}
 
 ALLOWED_HOSTS = ['*']
-
-# Application definition
 
 INSTALLED_APPS = [
     "jazzmin",
@@ -44,8 +44,6 @@ INSTALLED_APPS = [
     "clientes",
     "atualizacao",
     "repositorio",
-    "central.apps.CentralConfig",
-    "agent.apps.AgentConfig"
 ]
 
 MIDDLEWARE = [
@@ -129,19 +127,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-try:
-    SERVIDOR_CENTRAL = int(os.environ.get('SERVIDOR_CENTRAL', '0')) == 1
-except ValueError:
-    SERVIDOR_CENTRAL = False
-    print("Variável de ambiente SERVIDOR_CENTRAL inválida.\n"
-          f"Deveria ser 0 ou 1, porém é: {os.environ.get('SERVIDOR_CENTRAL')}\n" 
-          "Usando valor padrão False.\n")
-
-if not SERVIDOR_CENTRAL:
-    IP_CENTRAL = os.environ.get('IP_CENTRAL')
-    PORTA_CENTRAL = os.environ.get('PORTA_CENTRAL')
-    CENTRAL_USA_TLS = int(os.environ.get('CENTRAL_USA_TLS', '0')) == 1
-
-    if not IP_CENTRAL or not PORTA_CENTRAL:
-        raise Exception("Variáveis de ambiente IP_CENTRAL e PORTA_CENTRAL são obrigatórias para aplicações.")

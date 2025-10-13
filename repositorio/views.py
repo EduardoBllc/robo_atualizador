@@ -3,68 +3,30 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.conf import settings
 
 from repositorio.models import Repositorio
 from repositorio.serializer import RepositorioSerializer
-from repositorio.services import enviar_cadastro_aplicacao, cadastrar_aplicacao
+from repositorio.services import enviar_cadastro_repositorio, cadastrar_repositorio, get_todos_repositorios_clientes, \
+    get_repositorio_cliente, get_todos_repositorios_locais, get_repositorio_local
 from clientes.models import Cliente
 
 
 class RepositorioView(APIView):
-    def get(self, request, pk=None, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         status_res = status.HTTP_200_OK
 
         if settings.SERVIDOR_CENTRAL:
-            # Se é o servidor central, busca as aplicações de todos os clientes cadastrados nele
-            # e retorna um dicionário com o id do cliente como chave e a lista de aplicações como valor.
-            resposta = {}
-
-            def trata_resposta_cliente(resposta_req):
-                if resposta_req.status_code == 204:
-                    return []
-                elif resposta_req.status_code < 400:
-                    return resposta_req.json()
-                else:
-                    return {'error': f'Erro ao buscar repositórios do cliente {cliente.nome}.'}
-
-            if pk is None:
-                clientes = Cliente.objects.all()
-
-                for cliente in clientes:
-                    res = requests.get(f'{cliente.url_base}/aplicacao/')
-                    resposta[cliente.id] = trata_resposta_cliente(res)
-
-            else:
-                try:
-                    cliente = get_object_or_404(Cliente, pk=pk)
-                    res = requests.get(f'{cliente.url_base}/aplicacao/')
-                    resposta = trata_resposta_cliente(res)
-
-                except Http404:
-                    resposta = {'error': 'Cliente não encontrado.'}
-                    status_res = status.HTTP_404_NOT_FOUND
+            resposta = get_todos_repositorios_clientes()
 
         else:
-            if pk is None:
-                repositorio = Repositorio.objects.all()
+            resposta = get_todos_repositorios_locais()
 
-                if not repositorio:
-                    resposta = []
-                    status_res = status.HTTP_204_NO_CONTENT
-                else:
-                    serializer = RepositorioSerializer(repositorio, many=True)
-                    resposta = serializer.data
-            else:
-                try:
-                    aplicacao = get_object_or_404(Repositorio, pk=pk)
-                    serializer = RepositorioSerializer(aplicacao)
-                    resposta = serializer.data
-                except Http404:
-                    resposta = {'error': 'Aplicação não encontrada.'}
-                    status_res = status.HTTP_404_NOT_FOUND
+            if not resposta:
+                status_res = status.HTTP_204_NO_CONTENT
 
         return Response(resposta, status=status_res)
 
@@ -81,14 +43,14 @@ class RepositorioView(APIView):
                 cliente_id = request.data.get('cliente', None)
 
                 cliente = Cliente.objects.get(id=cliente_id)
-                status_res, resposta = enviar_cadastro_aplicacao(serializer, cliente)
+                status_res, resposta = enviar_cadastro_repositorio(serializer, cliente)
 
             else:
-                aplicacao = cadastrar_aplicacao(serializer)
+                repositorio = cadastrar_repositorio(serializer)
                 status_res = status.HTTP_201_CREATED
                 resposta = {
-                    'message': 'Aplicação cadastrada com sucesso.',
-                    'aplicacao_id': aplicacao.id
+                    'message': 'Repositório cadastrado com sucesso.',
+                    'repositorio_id': repositorio.id
                 }
 
         except ValidationError as e:
@@ -100,30 +62,75 @@ class RepositorioView(APIView):
             status_res = status.HTTP_400_BAD_REQUEST
 
         except Exception as e:
-            resposta = {'error': f'Erro ao tentar cadastrar aplicação: {e}'}
+            resposta = {'error': f'Erro ao tentar cadastrar repositório: {e}'}
             status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
 
         return Response(resposta, status=status_res, content_type='application/json;charset=utf-8')
 
-    def delete(self, request, pk=None, *args, **kwargs):
-        try:
-            assert pk is not None, 'ID da aplicação obrigatória para método delete.'
-            aplicacao = get_object_or_404(Repositorio, pk=pk)
-            aplicacao.delete()
 
-            status_res = status.HTTP_200_OK
-            resposta = {'message': 'Aplicação deletada com sucesso.'}
+class RepositorioDetailsView(APIView):
+    def get(self, request: Request, pk: int = None, *args, **kwargs):
+        status_res = status.HTTP_200_OK
 
-        except AssertionError as e:
-            resposta = {'error': str(e)}
-            status_res = status.HTTP_400_BAD_REQUEST
+        if settings.SERVIDOR_CENTRAL:
+            # Se é o servidor central, busca as aplicações de todos os clientes cadastrados nele
+            # e retorna um dicionário com o id do cliente como chave e a lista de aplicações como valor.
+            try:
+                assert 'cliente' in request.query_params, 'Parâmetro "cliente" obrigatório.'
+                cliente_id = request.query_params.get('cliente', None)
+                cliente = get_object_or_404(Cliente, pk=cliente_id)
+                resposta = get_repositorio_cliente(cliente=cliente, id_repositorio=pk)
+            except AssertionError as e:
+                resposta = {'error': str(e)}
+                status_res = status.HTTP_400_BAD_REQUEST
+        else:
+            try:
+                resposta = get_repositorio_local(id_repositorio=pk)
+            except Http404:
+                resposta = {'error': 'Repositório não encontrado.'}
+                status_res = status.HTTP_404_NOT_FOUND
 
-        except Http404:
-            resposta = {'error': 'Aplicação não encontrada.'}
-            status_res = status.HTTP_404_NOT_FOUND
+        return Response(resposta, status=status_res)
 
-        except Exception as e:
-            resposta = {'error': f'Erro ao tentar deletar aplicação: {e}'}
-            status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
+    def delete(self, request, pk: int = None, *args, **kwargs):
+        if settings.SERVIDOR_CENTRAL:
+            assert 'cliente' in request.data, 'Campo "cliente" obrigatório.'
+            cliente_id = request.data.get('cliente', None)
+
+            try:
+                cliente = get_object_or_404(Cliente, pk=cliente_id)
+                res = requests.delete(f'{cliente.url_base}/repositorio/{pk}')
+
+                if res.status_code < 400:
+                    resposta = res.json()
+                    status_res = res.status_code
+                else:
+                    resposta = {'error': f'Erro ao tentar deletar repositório no cliente {cliente.nome}.'}
+                    status_res = res.status_code
+
+            except Http404:
+                resposta = {'error': 'Cliente não encontrado.'}
+                status_res = status.HTTP_404_NOT_FOUND
+
+        else:
+            try:
+                assert pk is not None, 'ID do repositório obrigatório para método delete.'
+                repositorio = get_object_or_404(Repositorio, pk=pk)
+                repositorio.delete()
+
+                status_res = status.HTTP_200_OK
+                resposta = {'message': 'Repositório deletado com sucesso.'}
+
+            except AssertionError as e:
+                resposta = {'error': str(e)}
+                status_res = status.HTTP_400_BAD_REQUEST
+
+            except Http404:
+                resposta = {'error': 'Repositório não encontrado.'}
+                status_res = status.HTTP_404_NOT_FOUND
+
+            except Exception as e:
+                resposta = {'error': f'Erro ao tentar deletar repositório: {e}'}
+                status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
 
         return Response(resposta, status=status_res, content_type='application/json;charset=utf-8')
