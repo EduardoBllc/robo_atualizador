@@ -3,4 +3,8 @@ Settings for the Central (master) role.
 """
 from .base import *
 
-CENTRAL = True
+INSTALLED_APPS += [
+    "central",
+    "webhooks",
+    "dispatch",
+]

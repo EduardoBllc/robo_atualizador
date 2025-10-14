@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 # Resolve base dir to the project root (repository root)
 BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 
 # Load environment variables from .env at the project root
 load_dotenv(BASE_DIR / ".env")
@@ -29,14 +30,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    # domain apps
-    "status",
-    "clientes",
-    "atualizacao",
-    "repositorio",
-    # orchestration/control apps
-    "central.apps.CentralConfig",
-    "agent.apps.AgentConfig",
+    "core",
+    "contracts",
+    "authapp",
 ]
 
 MIDDLEWARE = [

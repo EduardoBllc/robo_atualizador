@@ -8,14 +8,9 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
 import os
-from dotenv import load_dotenv
-from django.core.asgi import get_asgi_application
-from pathlib import Path
 
-if not os.environ.get('DJANGO_SETTINGS_MODULE'):
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    load_dotenv(BASE_DIR / ".env")
-    ROLE = os.environ.get('ROLE', 'central').lower()
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"robo_atualizador.settings.{ROLE}")
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "robo_atualizador.settings")
 
 application = get_asgi_application()
