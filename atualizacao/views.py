@@ -21,7 +21,7 @@ class AtualizacaoView(APIView):
 
         branch: str = request.data.get('branch')
 
-        if settings.SERVIDOR_CENTRAL:
+        if settings.IS_CENTRAL:
             for cliente in Cliente.objects.all():
                 url_atualizacao = f'{cliente.url_base}/atualizar/'
                 body = {

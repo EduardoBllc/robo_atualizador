@@ -20,7 +20,7 @@ class ClientesView(APIView):
         serializer = ClienteSerializer(data=request.data)
 
         if serializer.is_valid():
-            if settings.SERVIDOR_CENTRAL:
+            if settings.IS_CENTRAL:
                 status_res, resposta = cadastra_cliente(serializer)
             else:
                 status_res, resposta = solicita_cadastro_central(serializer)

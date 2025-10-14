@@ -2,11 +2,16 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from dotenv import load_dotenv
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "robo_atualizador.settings")
+    if not os.environ.get('DJANGO_SETTINGS_MODULE'):
+        load_dotenv()
+        role = os.environ.get('ROLE', 'central').lower()
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", f"robo_atualizador.settings.{role}")
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

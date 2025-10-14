@@ -13,7 +13,7 @@ class StatusView(APIView):
             'status': 'ok',
         }
 
-        if settings.SERVIDOR_CENTRAL:
+        if settings.IS_CENTRAL:
             dados['clientes'] = []
 
             for cliente in Cliente.objects.all():

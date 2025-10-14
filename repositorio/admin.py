@@ -8,5 +8,5 @@ class RepositorioAdmin(admin.ModelAdmin):
     readonly_fields = ('branch_ativa', 'commit_atual_formatado', )
     search_fields = ('nome',)
 
-if not settings.SERVIDOR_CENTRAL:
+if not settings.IS_CENTRAL:
     admin.site.register(Repositorio, RepositorioAdmin)

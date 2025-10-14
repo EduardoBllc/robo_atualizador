@@ -19,7 +19,7 @@ class RepositorioView(APIView):
     def get(self, request: Request, *args, **kwargs):
         status_res = status.HTTP_200_OK
 
-        if settings.SERVIDOR_CENTRAL:
+        if settings.IS_CENTRAL:
             resposta = get_todos_repositorios_clientes()
 
         else:
@@ -38,7 +38,7 @@ class RepositorioView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
 
-            if settings.SERVIDOR_CENTRAL:
+            if settings.IS_CENTRAL:
                 assert 'cliente' in request.data, 'Campo "cliente" obrigatório.'
                 cliente_id = request.data.get('cliente', None)
 
@@ -72,7 +72,7 @@ class RepositorioDetailsView(APIView):
     def get(self, request: Request, pk: int = None, *args, **kwargs):
         status_res = status.HTTP_200_OK
 
-        if settings.SERVIDOR_CENTRAL:
+        if settings.IS_CENTRAL:
             # Se é o servidor central, busca as aplicações de todos os clientes cadastrados nele
             # e retorna um dicionário com o id do cliente como chave e a lista de aplicações como valor.
             try:
@@ -93,7 +93,7 @@ class RepositorioDetailsView(APIView):
         return Response(resposta, status=status_res)
 
     def delete(self, request, pk: int = None, *args, **kwargs):
-        if settings.SERVIDOR_CENTRAL:
+        if settings.IS_CENTRAL:
             assert 'cliente' in request.data, 'Campo "cliente" obrigatório.'
             cliente_id = request.data.get('cliente', None)
 
