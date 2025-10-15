@@ -17,9 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from repositorio.views import RepositorioView, RepositorioDetailsView
+from agent.project import RepositorioView, RepositorioDetailsView
 from atualizacao.views import AtualizacaoView
-from clientes.views import ClientesView
+from central.agent.views import ClientesView
 from status.views import StatusView
 
 urlpatterns = [
@@ -27,6 +27,6 @@ urlpatterns = [
     path('status/', StatusView.as_view(), name='status'),
     path('cliente/', ClientesView.as_view(), name='cliente'),
     path('atualizar/', AtualizacaoView.as_view(), name='atualizacao'),
-    path('repositorio/', RepositorioView.as_view(), name='repositorio'),
-    path("repositorio/<int:pk>/", RepositorioDetailsView.as_view(), name="repositorio-detail"),
+    path('project/', RepositorioView.as_view(), name='project'),
+    path("project/<int:pk>/", RepositorioDetailsView.as_view(), name="project-detail"),
 ]

@@ -1,7 +1,7 @@
 import os
 import git
 
-from repositorio.models import Repositorio
+from agent.project import Project
 
 def check_remote(git_repo: git.Repo, remote: str = 'origin') -> bool:
     try:
@@ -41,13 +41,13 @@ def switch_branch(git_repo: git.Repo, branch: str, remote: str | git.Remote = 'o
             raise ValueError(f'Erro ao trocar para branch {remote_branch_name}: {str(e)}')
 
 
-def update(repository: Repositorio,
+def update(repository: Project,
            atualizar: bool = True,
            branch: str = None,
            hash_commit: str = None,
            auto_stash: bool = True):
 
-    repository_path = repository.caminho
+    repository_path = repository.path
     remote = repository.remote
 
     if not os.path.exists(repository_path):

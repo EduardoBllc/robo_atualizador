@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from repositorio.models import Repositorio
-from clientes.models import Cliente
+from agent.project import Project
+from central.agent.models import Agent
 from atualizacao.services import update
 
 
@@ -22,23 +22,23 @@ class AtualizacaoView(APIView):
         branch: str = request.data.get('branch')
 
         if settings.IS_CENTRAL:
-            for cliente in Cliente.objects.all():
-                url_atualizacao = f'{cliente.url_base}/atualizar/'
+            for cliente in Agent.objects.all():
+                url_atualizacao = f'{cliente.base_url}/atualizar/'
                 body = {
                     'branch': branch
                 }
                 try:
                     res = requests.post(url_atualizacao, timeout=10, data=body)
                     if res.status_code == 200:
-                        print(f'Atualização enviada para {cliente.nome} com sucesso.')
+                        print(f'Atualização enviada para {cliente.name} com sucesso.')
                     else:
-                        print(f'Erro ao enviar atualização para {cliente.nome}. Status code: {res.status_code}')
+                        print(f'Erro ao enviar atualização para {cliente.name}. Status code: {res.status_code}')
                 except Exception as e:
-                    print(f'Erro ao enviar atualização para {cliente.nome}: {str(e)}')
+                    print(f'Erro ao enviar atualização para {cliente.name}: {str(e)}')
 
         else:
-            for repo in Repositorio.objects.all():
-                if repo.branch_ativa.name == branch:
+            for repo in Project.objects.all():
+                if repo.active_branch.name == branch:
                     update(repo)
 
 
