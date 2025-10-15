@@ -41,7 +41,6 @@ class AtualizacaoView(APIView):
                 if repo.active_branch.name == branch:
                     update(repo)
 
-
         return Response(status=status.HTTP_200_OK)
 
 

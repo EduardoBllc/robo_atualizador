@@ -143,3 +143,6 @@ def update(repository: Project,
                 git_repository.git.stash('pop')
             except git.exc.GitCommandError as e:
                 raise Exception(f'Erro ao aplicar o stash de volta: {str(e)}')
+
+    # TODO: Verify if there were changes after pull
+    return True, git_repository.head.commit

@@ -10,7 +10,7 @@ from django.conf import settings
 
 from agent.project.models import Project
 from agent.project.serializer import ProjectSerializer
-from agent.project.services import enviar_cadastro_repositorio, cadastrar_repositorio, get_projects_data
+from agent.project.services import cadastrar_repositorio
 from central.agent.models import Agent
 
 
@@ -94,7 +94,7 @@ class ProjectDetailsView(APIView):
 
             try:
                 cliente = get_object_or_404(Agent, pk=cliente_id)
-                res = requests.delete(f'{cliente.base_url}/repositorio/{pk}')
+                res = requests.delete(f'{cliente.base_url}/projects/{pk}')
 
                 if res.status_code < 400:
                     resposta = res.json()

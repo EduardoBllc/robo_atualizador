@@ -1,0 +1,14 @@
+from robo_atualizador.urls.base import urlpatterns
+from django.urls import path
+
+from core.views.status import AgentStatusView
+from agent.project.views import ProjectView, ProjectDetailsView
+from runner.views import UpdateRunnerView
+
+urlpatterns += [
+    path('status/', AgentStatusView.as_view(), name='status'),
+    path('project/', ProjectView.as_view(), name='project'),
+    path("project/<int:project_id>/", ProjectDetailsView.as_view(), name="project-detail"),
+    path("update/", UpdateRunnerView.as_view(), name="update-runner"),
+    path("update/<int:project_id>/", ProjectDetailsView.as_view(), name="project-update"),
+]
