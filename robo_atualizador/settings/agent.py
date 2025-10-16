@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / '.env')
 
 INSTALLED_APPS += [
-    "agent",
+    "agent.register",
+    "agent.project",
     "runner",
     "scheduler",
 ]

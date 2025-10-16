@@ -18,7 +18,7 @@ class AgentView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = AgentSerializer(data=request.data)
+        serializer = AgentSerializer(data=request.timestamp)
 
         try:
             serializer.is_valid(raise_exception=True)
@@ -93,7 +93,7 @@ class AgentProjectsView(APIView):
         return Response(response, status=res_status)
 
     def post(self, request, agent_id: int, *args, **kwargs):
-        serializer = AgentProjectSerializer(data=request.data)
+        serializer = AgentProjectSerializer(data=request.timestamp)
 
         try:
             # Validate incoming data

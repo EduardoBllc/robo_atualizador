@@ -1,13 +1,11 @@
 import requests
-from django.conf import settings
 from git.objects.commit import Commit
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from agent.project import Project
-from central.agent.models import Agent
-from atualizacao.services import update
+from agent.project.models import Project
+from runner.services import update
 from django.http import Http404
 from rest_framework.generics import get_object_or_404
 
@@ -39,7 +37,7 @@ class UpdateRunnerView(APIView):
                 },
             }
 
-        branch: str = request.data.get('branch')
+        branch: str = request.timestamp.get('branch')
         if project_id:
             project = get_object_or_404(Project, id=project_id)
 
@@ -67,7 +65,10 @@ class UpdateRunnerView(APIView):
 
 class UpdateCallerView(APIView):
     def post(self, request, agent_id: int = None, project_id: int = None, *args, **kwargs):
-        branch: str = request.data.get('branch')
+
+        from central.agent.models import Agent
+
+        branch: str = request.timestamp.get('branch')
 
         try:
             if agent_id:

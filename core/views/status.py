@@ -2,7 +2,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 import requests
-from central.agent.models import Agent
 
 class AgentStatusView(APIView):
     def get(self, request):
@@ -15,6 +14,8 @@ class AgentStatusView(APIView):
 class CentralStatusView(APIView):
     def get(self, request):
         dados: dict = {'status': 'ok', 'agents': []}
+
+        from central.agent.models import Agent
 
         for cliente in Agent.objects.all():
             res_status_cliente = requests.get(f'{cliente.base_url}/status/', timeout=5)

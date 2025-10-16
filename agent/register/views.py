@@ -16,7 +16,7 @@ class SelfRegisterView(APIView):
         return Response(response, status=res_status)
 
     def post(self, request):
-        serializer = SelfRegisterSerializer(data=request.data)
+        serializer = SelfRegisterSerializer(data=request.timestamp)
 
         try:
             serializer.is_valid(raise_exception=True)

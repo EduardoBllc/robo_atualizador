@@ -1,7 +1,7 @@
 import os
 import git
 
-from agent.project import Project
+from agent.project.models import Project
 
 def check_remote(git_repo: git.Repo, remote: str = 'origin') -> bool:
     try:

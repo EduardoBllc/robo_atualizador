@@ -3,9 +3,13 @@ from django.urls import path
 
 from core.views.status import CentralStatusView
 from central.agent.views import AgentProjectsView, AgentView
+from runner.views import UpdateCallerView
 
 urlpatterns += [
     path('status/', CentralStatusView.as_view(), name='status'),
     path('agent/', AgentView.as_view(), name='agent'),
     path('agent/<int:agent_id>/project/<int:project_id>/', AgentProjectsView.as_view(), name='agent-project'),
+    path('update/', UpdateCallerView.as_view(), name='update-all'),
+    path('agent/<int:agent_id>/update/', UpdateCallerView.as_view(), name='update-agent'),
+    path('agent/<int:agent_id>/project/<int:project_id>/update/', UpdateCallerView.as_view(), name='update-agent-project'),
 ]

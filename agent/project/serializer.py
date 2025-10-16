@@ -11,12 +11,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
     def to_representation(self, instance: Project):
-        representacao = super().to_representation(instance)
+        repr = super().to_representation(instance)
 
-        representacao['ultimo_commit'] = {
+        repr['last_commit'] = {
             'hash': instance.actual_commit.hexsha,
             'data': instance.actual_commit_date,
         }
-        representacao['branch_ativa'] = instance.active_branch.name if instance.active_branch else None
+        repr['active_branch'] = instance.active_branch.name if instance.active_branch else None
 
-        return representacao
+        return repr

@@ -1,24 +1,9 @@
 import git
-import requests
 import os
 
-from requests import Response
-from rest_framework.generics import get_object_or_404
-
-from agent.project.models import Project
 from agent.project.serializer import ProjectSerializer
-from central.agent.models import Agent
 
-
-def enviar_cadastro_repositorio(serializer: ProjectSerializer, cliente: Agent):
-    resposta = requests.post(
-        f'{cliente.base_url}/repositorio/',
-        data=serializer.validated_data
-    )
-
-    return resposta.status_code, resposta.json()
-
-def cadastrar_repositorio(serializer: ProjectSerializer):
+def register_project(serializer: ProjectSerializer):
     dados_serializados = serializer.validated_data
 
     caminho_repositorio = dados_serializados['caminho']
