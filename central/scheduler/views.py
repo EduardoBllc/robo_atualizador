@@ -18,12 +18,9 @@ class UpdateSchedulerView(APIView):
             if agent_id:
                 agent = get_object_or_404(Agent, id=agent_id)
 
-                url = f'{agent.base_url}/update/'
+                url = f'{agent.base_url}/{f"project/{project_id}/" if project_id else ""}update/'
 
-                if project_id:
-                    url = f'{url}{project_id}/'
-
-                agent_res = requests.post(url, timeout=10, data={'branch': branch})
+                agent_res = requests.post(url, data={'branch': branch})
 
                 # Raise an error for bad responses (4xx and 5xx)
                 agent_res.raise_for_status()
@@ -34,7 +31,7 @@ class UpdateSchedulerView(APIView):
                 response = {}
 
                 for agent in Agent.objects.all():
-                    agent_res = requests.post(f'{agent.base_url}/update/', timeout=10, data={'branch': branch})
+                    agent_res = requests.post(f'{agent.base_url}/update/', data={'branch': branch})
                     response[agent.id] = {
                         'status': agent_res.status_code,
                         'response': agent_res.json(),
