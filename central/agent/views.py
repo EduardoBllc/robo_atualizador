@@ -122,7 +122,10 @@ class AgentProjectsView(APIView):
         return Response(response, status=res_status)
 
     def post(self, request, agent_id: int, *args, **kwargs):
-        serializer = AgentProjectSerializer(data=request.timestamp)
+        data = request.data.copy()
+        data['agent_id'] = agent_id
+
+        serializer = AgentProjectSerializer(data=data)
 
         try:
             # Validate incoming data

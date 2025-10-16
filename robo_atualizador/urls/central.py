@@ -10,6 +10,7 @@ urlpatterns += [
     path('agent/', AgentView.as_view(), name='agent'),
     path('agent/<int:agent_id>/', AgentView.as_view(), name='agent-detail'),
     path('agent/<int:agent_id>/project/<int:project_id>/', AgentProjectsView.as_view(), name='agent-project'),
+    path('agent/<int:agent_id>/project/', AgentProjectsView.as_view(), name='agent-projects'),
     path('update/', UpdateSchedulerView.as_view(), name='update-all'),
     path('agent/<int:agent_id>/update/', UpdateSchedulerView.as_view(), name='update-agent'),
     path('agent/<int:agent_id>/project/<int:project_id>/update/', UpdateSchedulerView.as_view(), name='update-agent-project'),

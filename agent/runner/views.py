@@ -21,10 +21,10 @@ class UpdateRunnerView(APIView):
         """
 
         def mount_response_for_project(proj: Project, upd: bool, commit: Commit) -> dict:
-            if update:
-                message = f'Project {project.name} successfully updated.'
+            if upd:
+                message = f'Project {proj.name} successfully updated.'
             else:
-                message = f'Project {project.name} is already up to date.'
+                message = f'Project {proj.name} is already up to date.'
 
             return {
                 'message': message,
@@ -41,7 +41,7 @@ class UpdateRunnerView(APIView):
         if project_id:
             project = get_object_or_404(Project, id=project_id)
 
-            if project.active_branch.name == branch:
+            if not branch or project.active_branch.name == branch:
                 updated, head_commit = update(project)
 
                 response = mount_response_for_project(project, updated, head_commit)
@@ -54,7 +54,7 @@ class UpdateRunnerView(APIView):
             response = {}
 
             for project in Project.objects.all():
-                if project.active_branch.name == (branch or project.branch_trunc):
+                if not branch or project.active_branch.name == branch:
                     try:
                         updated, new_head_commit = update(project)
                         response[project.id] = mount_response_for_project(project, updated, new_head_commit)

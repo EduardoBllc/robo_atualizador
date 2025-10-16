@@ -11,15 +11,11 @@ class AgentSerializer(serializers.ModelSerializer):
 
 
 class AgentProjectSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=100, required=True)
-    ip_address = serializers.IPAddressField(required=True)
-    port = serializers.IntegerField(required=False)
-    uses_tls = serializers.BooleanField(default=False, required=False)
-
-    def to_representation(self, instance):
-        return {
-            'name': instance['name'],
-            'ip_address': instance['ip_address'],
-            'port': instance['port'],
-            'uses_tls': instance['uses_tls'],
-        }
+    agent_id = serializers.IntegerField(required=True)
+    path = serializers.CharField(required=True)
+    name = serializers.CharField(required=True)
+    branch_trunc = serializers.CharField(required=False)
+    branch_dev = serializers.CharField(required=False)
+    branch_homolog = serializers.CharField(required=False)
+    branch_prod = serializers.CharField(required=False)
+    remote = serializers.CharField(required=False)
