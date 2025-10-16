@@ -12,7 +12,7 @@ class UpdateSchedulerView(APIView):
 
         from central.agent.models import Agent
 
-        branch: str = request.timestamp.get('branch')
+        branch: str = request.data.get('branch')
 
         try:
             if agent_id:

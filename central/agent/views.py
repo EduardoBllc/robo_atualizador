@@ -83,7 +83,7 @@ class AgentProjectsView(APIView):
             agents_qs = Agent.objects.all()
 
             if agent_id:
-                agents_qs = agents_qs.filter(agent_id=agent_id)
+                agents_qs = agents_qs.filter(id=agent_id)
 
             for agent in agents_qs:
                 url = f'{agent.base_url}/project/'
