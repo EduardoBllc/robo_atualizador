@@ -6,7 +6,7 @@ ROLE = os.getenv("ROLE", "agent").strip().lower()
 
 MODULE_BY_ROLE = {
     "agent": "robo_atualizador.urls.agent",
-    "central": "robo_atualizador.base.central",
+    "central": "robo_atualizador.urls.central",
 }
 
 if ROLE not in MODULE_BY_ROLE:

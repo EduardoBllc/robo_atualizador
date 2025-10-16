@@ -31,7 +31,7 @@ class ProjectView(APIView):
         return Response(response, status=res_status)
 
     def post(self, request, *args, **kwargs):
-        serializer = ProjectSerializer(data=request.timestamp)
+        serializer = ProjectSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
@@ -48,7 +48,7 @@ class ProjectView(APIView):
             status_res = status.HTTP_400_BAD_REQUEST
 
         except AssertionError as e:
-            response = e
+            response = {'error': str(e)}
             status_res = status.HTTP_400_BAD_REQUEST
 
         except Exception as e:

@@ -6,8 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Resolve base dir to the project root (repository root)
-BASE_DIR = Path(__file__).resolve().parent.parent
-PROJECT_ROOT = BASE_DIR.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Load environment variables from .env at the project root
 load_dotenv(BASE_DIR / ".env")

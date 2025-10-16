@@ -3,7 +3,9 @@ from django.urls import path
 
 from core.views.status import AgentStatusView
 from agent.project.views import ProjectView, ProjectDetailsView
-from runner.views import UpdateRunnerView
+from agent.runner.views import UpdateRunnerView
+
+from agent.register.views import SelfRegisterView
 
 urlpatterns += [
     path('status/', AgentStatusView.as_view(), name='status'),
@@ -11,4 +13,5 @@ urlpatterns += [
     path("project/<int:project_id>/", ProjectDetailsView.as_view(), name="project-detail"),
     path("update/", UpdateRunnerView.as_view(), name="update-runner"),
     path("update/<int:project_id>/", ProjectDetailsView.as_view(), name="project-update"),
+    path('register/', SelfRegisterView.as_view(), name='self-register'),
 ]

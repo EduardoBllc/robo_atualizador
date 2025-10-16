@@ -75,7 +75,7 @@ def update(repository: Project,
                     git_repository.git.stash('save', 'Auto-stash before update')
 
                     # Verificar se o stash foi realmente criado
-                    qty_stashes_after = len(git_repository.git.stash('list').splitlines)
+                    qty_stashes_after = len(git_repository.git.stash('list').splitlines())
 
                     did_stash = qty_stashes_after > qty_stashes_before
                 except git.exc.GitCommandError as e:

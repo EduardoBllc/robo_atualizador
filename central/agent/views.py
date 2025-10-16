@@ -12,13 +12,30 @@ from central.agent.serializer import AgentSerializer, AgentProjectSerializer
 
 class AgentView(APIView):
 
-    def get(self, request):
-        agents = Agent.objects.all()
-        serializer = AgentSerializer(agents, many=True)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        if 'ip_address' in request.query_params and 'port' in request.query_params:
+            agent_ip = request.query_params['ip_address']
+            agent_port = request.query_params['port']
 
-    def post(self, request):
-        serializer = AgentSerializer(data=request.timestamp)
+            print(f'{agent_ip}:{agent_port}')
+            try:
+                agent = Agent.objects.get(ip_address=agent_ip, port=agent_port)
+                serializer = AgentSerializer(agent)
+                response = serializer.data
+                res_status = status.HTTP_200_OK
+            except Agent.DoesNotExist:
+                response = {'error': 'Agent not found.'}
+                res_status = status.HTTP_404_NOT_FOUND
+        else:
+            agents = Agent.objects.all()
+            serializer = AgentSerializer(agents, many=True)
+            response = serializer.data
+            res_status = status.HTTP_200_OK if agents else status.HTTP_204_NO_CONTENT
+
+        return Response(response, status=res_status)
+
+    def post(self, request, *args, **kwargs):
+        serializer = AgentSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
@@ -36,20 +53,23 @@ class AgentView(APIView):
                 raise AssertionError('Status response is not ok')
 
             instance = serializer.save()
-            resposta = {'message': 'Agent successfully registered.', 'agent_id': instance.id}
+            response = {'message': 'Agent successfully registered.', 'agent_id': instance.id}
 
             status_res = status.HTTP_201_CREATED
         except ValidationError:
-            resposta = {'error': 'Invalid data', 'details': serializer.errors}
+            response = {'error': 'Invalid data', 'details': serializer.errors}
+            status_res = status.HTTP_400_BAD_REQUEST
+        except requests.exceptions.ConnectionError:
+            response = {'error': 'Agent not reachable or returned an error status.'}
             status_res = status.HTTP_400_BAD_REQUEST
         except AssertionError as e:
-            resposta = {'error': str(e)}
+            response = {'error': str(e)}
             status_res = status.HTTP_400_BAD_REQUEST
         except Exception as e:
-            resposta = {'error': str(e)}
+            response = {'error': str(e)}
             status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return Response(resposta, status=status_res)
+        return Response(response, status=status_res)
 
 
 class AgentProjectsView(APIView):

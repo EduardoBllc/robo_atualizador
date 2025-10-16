@@ -5,6 +5,5 @@ from .base import *
 
 INSTALLED_APPS += [
     "central.agent",
-    "webhooks",
-    "dispatch",
+    "central.scheduler",
 ]

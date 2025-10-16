@@ -6,7 +6,7 @@ from agent.project.serializer import ProjectSerializer
 def register_project(serializer: ProjectSerializer):
     dados_serializados = serializer.validated_data
 
-    caminho_repositorio = dados_serializados['caminho']
+    caminho_repositorio = dados_serializados['path']
 
     # Testa se o caminho enviado existe
     if not os.path.exists(caminho_repositorio):
