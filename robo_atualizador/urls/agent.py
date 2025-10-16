@@ -12,6 +12,6 @@ urlpatterns += [
     path('project/', ProjectView.as_view(), name='project'),
     path("project/<int:project_id>/", ProjectDetailsView.as_view(), name="project-detail"),
     path("update/", UpdateRunnerView.as_view(), name="update-runner"),
-    path("update/<int:project_id>/", ProjectDetailsView.as_view(), name="project-update"),
+    path("update/<int:project_id>/", UpdateRunnerView.as_view(), name="project-update"),
     path('register/', SelfRegisterView.as_view(), name='self-register'),
 ]
