@@ -12,8 +12,17 @@ from central.agent.serializer import AgentSerializer, AgentProjectSerializer
 
 class AgentView(APIView):
 
-    def get(self, request, *args, **kwargs):
-        if 'ip_address' in request.query_params and 'port' in request.query_params:
+    def get(self, request, agent_id: int = None, *args, **kwargs):
+        if agent_id:
+            try:
+                agent = get_object_or_404(Agent, pk=agent_id)
+                serializer = AgentSerializer(agent)
+                response = serializer.data
+                res_status = status.HTTP_200_OK
+            except Http404:
+                response = {'error': 'Agent not found.'}
+                res_status = status.HTTP_404_NOT_FOUND
+        elif 'ip_address' in request.query_params and 'port' in request.query_params:
             agent_ip = request.query_params['ip_address']
             agent_port = request.query_params['port']
 
