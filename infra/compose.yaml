@@ -1,0 +1,94 @@
+name: robo_atualizador
+
+# Common DB service definition (DRY)
+x-db-base: &db-base
+  image: postgres:17.5-alpine
+  healthcheck: # Garantir que o banco está pronto para receber conexões antes de iniciar a aplicação
+    test: [ "CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" || exit 1" ]
+    interval: 4s
+    timeout: 3s
+    retries: 8
+    start_period: 4s
+
+services:
+  agent-db:
+    <<: *db-base
+    env_file:
+      - ../.env
+      - ../.env.agent
+    profiles:
+      - agent
+    networks:
+      - agent-net
+
+  agent-server:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    ports:
+      - "8081:80"
+    environment:
+      DJANGO_SETTINGS_MODULE: "robo_atualizador.settings"
+      PYTHONUNBUFFERED: "1"
+    env_file:
+      - ../.env
+      - ../.env.agent
+    volumes:
+      - ..:/app
+    entrypoint: [
+      "python",
+      "manage.py",
+      "runserver",
+      "0.0.0.0:80",
+    ]
+    profiles:
+      - agent
+    depends_on:
+      agent-db:
+        condition: service_healthy
+    networks:
+      - agent-net
+
+  central-db:
+    <<: *db-base
+    env_file:
+      - ../.env
+      - ../.env.central
+    profiles:
+      - central
+    networks:
+      - central-net
+
+  central-server:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      DJANGO_SETTINGS_MODULE: "robo_atualizador.settings"
+      PYTHONUNBUFFERED: "1"
+    env_file:
+      - ../.env
+      - ../.env.central
+    volumes:
+      - ..:/app
+    entrypoint: [
+      "python",
+      "manage.py",
+      "runserver",
+      "0.0.0.0:80",
+    ]
+    profiles:
+      - central
+    depends_on:
+      central-db:
+        condition: service_healthy
+    networks:
+      - central-net
+
+networks:
+  agent-net:
+    driver: bridge
+  central-net:
+    driver: bridge

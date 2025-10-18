@@ -20,8 +20,6 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
-    "jazzmin",
-    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -45,30 +43,36 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "robo_atualizador.urls"
 
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
 WSGI_APPLICATION = "robo_atualizador.wsgi.application"
 
-# Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if DEBUG:
+    # Database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    # Build DB settings accepting POSTGRES_* first, then DATABASE_* as fallback
+    DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.postgresql")
+    DB_NAME = os.environ.get("DATABASE_NAME") or "robo_atualizador"
+    DB_USER = os.environ.get("DATABASE_USER") or "postgres"
+    DB_PASSWORD = os.environ.get("DATABASE_PASSWORD") or "p"
+    DB_HOST = os.environ.get("DATABASE_HOST") or "localhost"
+    DB_PORT = os.environ.get("DATABASE_PORT") or "5432"
+
+    # Production database settings from environment variables
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": DB_NAME,
+            "USER": DB_USER,
+            "PASSWORD": DB_PASSWORD,
+            "HOST": DB_HOST,
+            "PORT": DB_PORT,
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -87,8 +91,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = "pt-br"
-TIME_ZONE = "America/Sao_Paulo"
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en')
+TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 
 USE_I18N = True
 USE_TZ = True
@@ -101,3 +105,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ROLE = os.environ.get('ROLE', 'central').lower()
 IS_CENTRAL = ROLE == 'central'
+
+if os.environ.get('RUN_MAIN', 'false').lower() == 'false':
+    print("")
+    print(f"Starting server as {ROLE.upper()}")
+    print("")
