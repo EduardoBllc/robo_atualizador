@@ -18,7 +18,7 @@ IS_CENTRAL = ROLE == 'central'
 
 if os.environ.get('RUN_MAIN', 'false').lower() == 'false':
     print("")
-    print(f"Starting server as {ROLE.upper()}")
+    print(f"Running as {ROLE.upper()}")
     print("")
 
 # SECURITY WARNING: keep the secret key used in production secret!

@@ -41,14 +41,14 @@ def switch_branch(git_repo: git.Repo, branch: str, remote: str | git.Remote = 'o
             raise ValueError(f'Erro ao trocar para branch {remote_branch_name}: {str(e)}')
 
 
-def update(repository: Project,
-           atualizar: bool = True,
+def update(project: Project,
+           do_update: bool = True,
            branch: str = None,
            hash_commit: str = None,
            auto_stash: bool = True):
 
-    repository_path = repository.path
-    remote = repository.remote
+    repository_path = project.path
+    remote = project.remote
 
     if not os.path.exists(repository_path):
         raise ValueError(f'O diretório {repository_path} não existe.')
@@ -96,7 +96,7 @@ def update(repository: Project,
             try:
                 commit_desejado = git_repository.commit(hash_commit)
             except git.exc.BadName:
-                if not atualizar:
+                if not do_update:
                     raise ValueError(f'O commit {hash_commit} não foi encontrado no repositório local.')
 
             if commit_desejado:
@@ -131,7 +131,7 @@ def update(repository: Project,
                     raise ValueError(f'Erro ao realizar checkout para o commit {hash_commit}: {str(e)}')
 
         # Passo 6: Se "atualizar" é True, fazer pull das últimas mudanças do branch atual
-        if atualizar:
+        if do_update:
             branch_atual = git_repository.active_branch.name
             try:
                 origin.pull(branch_atual)
