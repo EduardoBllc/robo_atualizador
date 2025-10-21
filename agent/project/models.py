@@ -13,6 +13,7 @@ class Project(models.Model):
     branch_dev = models.CharField(max_length=64, blank=True, null=True)
     branch_homolog = models.CharField(max_length=64, blank=True, null=True)
     branch_prod = models.CharField(max_length=64, blank=True, null=True)
+    auto_update = models.BooleanField(default=True, help_text="If enabled, the project will be automatically updated.")
 
     def __str__(self):
         return f"{self.name}({self.path})"
