@@ -11,6 +11,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Load environment variables from .env at the project root
 load_dotenv(BASE_DIR / ".env")
 
+ROLE = os.environ.get('ROLE', 'central').lower()
+assert ROLE in ('central', 'agent'), "ROLE must be either 'central' or 'agent'"
+
+IS_CENTRAL = ROLE == 'central'
+
+if os.environ.get('RUN_MAIN', 'false').lower() == 'false':
+    print("")
+    print(f"Starting server as {ROLE.upper()}")
+    print("")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-%k(bdf0j30o$w34x71g3%9m1i04%xd_j-gk7x$e+gs0z*3rgoz"
 
@@ -49,8 +59,8 @@ if DEBUG:
     # Database
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.sqlite3" ,
+            "NAME": BASE_DIR / f"db_{ROLE}.sqlite3",
         }
     }
 else:
@@ -102,11 +112,3 @@ STATIC_URL = "static/"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-ROLE = os.environ.get('ROLE', 'central').lower()
-IS_CENTRAL = ROLE == 'central'
-
-if os.environ.get('RUN_MAIN', 'false').lower() == 'false':
-    print("")
-    print(f"Starting server as {ROLE.upper()}")
-    print("")

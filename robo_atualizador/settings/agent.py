@@ -6,6 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env.agent')
 
 INSTALLED_APPS += [
     "agent.register",
