@@ -30,7 +30,7 @@ class UpdateSchedulerView(APIView):
             else:
                 response = {}
 
-                for agent in Agent.objects.all():
+                for agent in Agent.objects.filter(auto_update=True):
                     agent_res = requests.post(f'{agent.base_url}/update/', data={'branch': branch})
                     response[agent.id] = {
                         'status': agent_res.status_code,

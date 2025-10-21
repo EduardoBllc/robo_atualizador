@@ -8,6 +8,7 @@ class Agent(models.Model):
     uses_tls = models.BooleanField(default=False)
     registered_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+    auto_update = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'agent'
