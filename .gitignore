@@ -12,3 +12,4 @@
 *.pyd
 
 .DS_Store
+.vscode/
