@@ -2,6 +2,7 @@ import argparse
 from typing import Optional, Sequence
 
 from agent.runner.cli.update import build_update_subparser
+from agent.project.cli.addproject import build_addproject_subparser
 import os
 
 ROLE = os.environ.get('ROLE', 'agent').lower()
@@ -9,6 +10,7 @@ ROLE = os.environ.get('ROLE', 'agent').lower()
 # List of functions that build subparsers for different commands
 AGENT_SUBPARSERS = [
     build_update_subparser,
+    build_addproject_subparser,
 ]
 
 

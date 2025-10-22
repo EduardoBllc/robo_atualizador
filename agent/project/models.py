@@ -2,6 +2,7 @@ from django.db import models
 import git
 from datetime import datetime
 
+
 class Project(models.Model):
     name = models.CharField(max_length=100)
     path = models.CharField(max_length=128)
@@ -9,10 +10,6 @@ class Project(models.Model):
     modified_date = models.DateTimeField(auto_now=True)
     commands = models.ManyToManyField('Command', blank=True, related_name='aplicacoes')
     remote = models.CharField(max_length=64, default='origin')
-    trunk_branch = models.CharField(max_length=64, default='main')
-    development_branch = models.CharField(max_length=64, blank=True, null=True)
-    homologation_branch = models.CharField(max_length=64, blank=True, null=True)
-    production_branch = models.CharField(max_length=64, blank=True, null=True)
     auto_update = models.BooleanField(default=True, help_text="If enabled, the project will be automatically updated.")
 
     def __str__(self):
@@ -47,6 +44,7 @@ class Project(models.Model):
     def formatted_actual_commit(self) -> str:
         return f"{self.actual_commit.hexsha[:7]} - {self.actual_commit_date.strftime('%d/%m/%Y')}"
 
+
 class Command(models.Model):
     command = models.CharField(max_length=300)
     description = models.TextField(blank=True, null=True)
@@ -60,4 +58,3 @@ class Command(models.Model):
         db_table = "command"
         verbose_name = "Command"
         verbose_name_plural = "Commands"
-

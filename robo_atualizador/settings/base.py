@@ -16,11 +16,6 @@ assert ROLE in ('central', 'agent'), "ROLE must be either 'central' or 'agent'"
 
 IS_CENTRAL = ROLE == 'central'
 
-if os.environ.get('RUN_MAIN', 'false').lower() == 'false':
-    print("")
-    print(f"Running as {ROLE.upper()}")
-    print("")
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-%k(bdf0j30o$w34x71g3%9m1i04%xd_j-gk7x$e+gs0z*3rgoz"
 

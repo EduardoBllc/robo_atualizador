@@ -5,3 +5,10 @@
 .env
 .env.agent
 .env.central
+
+*__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.DS_Store
