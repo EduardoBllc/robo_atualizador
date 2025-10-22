@@ -10,6 +10,15 @@ def check_remote(git_repo: git.Repo, remote: str = 'origin') -> bool:
     except ValueError:
         return False
 
+
+def fetch_remote(repository: git.Repo, remote: str = 'origin'):
+    try:
+        origin = repository.remote(remote)
+        origin.fetch()
+    except ValueError:
+        raise ValueError(f'The remote {remote} does not exists.')
+
+
 def switch_branch(git_repo: git.Repo, branch: str, remote: str | git.Remote = 'origin', only_local: bool = False):
     if isinstance(remote, git.Remote):
         remote = remote.name
@@ -28,121 +37,104 @@ def switch_branch(git_repo: git.Repo, branch: str, remote: str | git.Remote = 'o
     else:
         remote_branch_name = f'{remote}/{branch}'
 
-        # Verificar se o branch existe no remoto
         if only_local or remote_branch_name not in git_repo.refs:
             raise ValueError(
                 f'Branch {branch} não existe no repositório local{"." if only_local else "ou remoto."}'
             )
 
-        # Criar o branch local a partir do remoto
         try:
             git_repo.git.checkout('-b', branch, remote_branch_name)
         except git.exc.GitCommandError as e:
             raise ValueError(f'Erro ao trocar para branch {remote_branch_name}: {str(e)}')
 
 
-def update(project: Project,
-           do_update: bool = True,
-           branch: str = None,
-           hash_commit: str = None,
-           auto_stash: bool = True):
+def do_checkout(repository: git.Repo,
+                hash_commit: str,
+                remote: str = 'origin',
+                after_fetch: bool = False):
+    head_commit = repository.head.commit
+
+    try:
+        target_commit = repository.commit(hash_commit)
+
+        if head_commit.hexsha == target_commit.hexsha:
+            return False
+
+        try:
+            repository.git.checkout(target_commit.hexsha)
+            return True
+        except git.exc.GitCommandError as e:
+            raise ValueError(f'Error checking out for commit {hash_commit}: {str(e)}')
+
+    except git.exc.BadName:
+        if after_fetch:
+            raise ValueError(f'Commit {hash_commit} was not found.')
+
+        fetch_remote(repository, remote)
+        do_checkout(repository, hash_commit, remote, after_fetch=True)
+
+
+def stash_push(repository: git.Repo):
+    try:
+        # Guardar quantidade de stashes antes de fazer o stash
+        qty_stashes_before = len(repository.git.stash('list').splitlines())
+
+        # Fazer stash das mudanças locais
+        repository.git.stash('save', 'Auto-stash before update')
+
+        # Verificar se o stash foi realmente criado
+        qty_stashes_after = len(repository.git.stash('list').splitlines())
+
+        return qty_stashes_after > qty_stashes_before
+    except git.exc.GitCommandError as e:
+        raise Exception(f'Erro pushing stash: {str(e)}')
+
+def stash_pop(repository: git.Repo, identifier: str = None):
+    try:
+        if identifier:
+            repository.git.stash('pop', identifier)
+        else:
+            repository.git.stash('pop')
+    except git.exc.GitCommandError as e:
+        raise Exception(f'Error applying stash: {str(e)}')
+
+
+def update(project: Project, auto_stash: bool = True):
+    updated = False
 
     repository_path = project.path
     remote = project.remote
 
     if not os.path.exists(repository_path):
-        raise ValueError(f'O diretório {repository_path} não existe.')
+        raise ValueError(f'The directory {repository_path} does not exists.')
 
     try:
-        git_repository = git.Repo(repository_path)
+        repository = git.Repo(repository_path)
     except git.exc.InvalidGitRepositoryError:
-        raise ValueError(f'O diretório {repository_path} não é um repositório Git válido.')
+        raise ValueError(f'The directory {repository_path} it\'s not a valid Git repository.')
 
-    if not check_remote(git_repository, remote):
-        raise ValueError(f'O repositório não possui um remote chamado {remote}.')
+    if not check_remote(repository, remote):
+        raise ValueError(f'The remote {remote} does not exists.')
 
     did_stash = False
 
     try:
-        # Passo 0: Verificar se há mudanças locais não comitadas
-        if git_repository.is_dirty(untracked_files=True):
+        if repository.is_dirty(untracked_files=True):
             if auto_stash:
-                try:
-                    # Guardar quantidade de stashes antes de fazer o stash
-                    qty_stashes_before = len(git_repository.git.stash('list').splitlines())
-
-                    # Fazer stash das mudanças locais
-                    git_repository.git.stash('save', 'Auto-stash before update')
-
-                    # Verificar se o stash foi realmente criado
-                    qty_stashes_after = len(git_repository.git.stash('list').splitlines())
-
-                    did_stash = qty_stashes_after > qty_stashes_before
-                except git.exc.GitCommandError as e:
-                    raise Exception(f'Erro ao fazer stash das mudanças locais: {str(e)}')
+                did_stash = stash_push(repository)
             else:
                 raise AssertionError('Existem mudanças locais não comitadas. Por favor, faça commit ou stash antes de atualizar.')
 
-        # Passo 1: Se "branch" foi fornecido, fazer checkout para o branch desejado
-        if branch:
-            switch_branch(git_repository, branch)
-
-        # Passo 2: Capturar o commit atual
-        commit_atual = git_repository.head.commit
-        commit_desejado = None
-
-        # Passo 3: Procurar commit desejado (se fornecido) no estado atual do repositório
-        if hash_commit:
-            try:
-                commit_desejado = git_repository.commit(hash_commit)
-            except git.exc.BadName:
-                if not do_update:
-                    raise ValueError(f'O commit {hash_commit} não foi encontrado no repositório local.')
-
-            if commit_desejado:
-                if commit_atual.hexsha != commit_desejado.hexsha:
-                    #  Fazer checkout para o commit desejado
-                    try:
-                        git_repository.git.checkout(commit_desejado.hexsha)
-                        return
-                    except git.exc.GitCommandError as e:
-                        raise ValueError(f'Erro ao realizar checkout para o commit {hash_commit}: {str(e)}')
-
-        # Passo 4: Buscar atualizações do repositório remoto
+        origin = repository.remote(remote)
+        active_branch_name = repository.active_branch.name
         try:
-            origin = git_repository.remote(remote)
-            origin.fetch()
-        except ValueError:
-            raise ValueError('O repositório não possui um remoto chamado "origin".')
-
-        # Passo 5: Se "hash_commit" foi fornecido, tentar encontrar o commit no repositório atualizado
-        if hash_commit and not commit_desejado:
-            try:
-                commit_desejado = git_repository.commit(hash_commit)
-            except git.exc.BadName:
-                raise ValueError(f'O commit {hash_commit} não foi encontrado no repositório local ou remoto.')
-
-            if commit_atual.hexsha != commit_desejado.hexsha:
-                #  Fazer checkout para o commit desejado
-                try:
-                    git_repository.git.checkout(commit_desejado.hexsha)
-                    return
-                except git.exc.GitCommandError as e:
-                    raise ValueError(f'Erro ao realizar checkout para o commit {hash_commit}: {str(e)}')
-
-        # Passo 6: Se "atualizar" é True, fazer pull das últimas mudanças do branch atual
-        if do_update:
-            branch_atual = git_repository.active_branch.name
-            try:
-                origin.pull(branch_atual)
-            except git.exc.GitCommandError as e:
-                raise ValueError(f'Erro ao fazer pull das últimas mudanças do branch {branch_atual}: {str(e)}')
+            origin.pull(active_branch_name)
+            # TODO: Verify if pull actually brought changes
+            updated = True
+        except git.exc.GitCommandError as e:
+            raise ValueError(f'Erro ao fazer pull das últimas mudanças do branch {active_branch_name}: {str(e)}')
     finally:
         if did_stash:
-            try:
-                git_repository.git.stash('pop')
-            except git.exc.GitCommandError as e:
-                raise Exception(f'Erro ao aplicar o stash de volta: {str(e)}')
+            stash_pop(repository)
 
-    # TODO: Verify if there were changes after pull
-    return True, git_repository.head.commit
+    return updated, repository.head.commit

@@ -9,10 +9,10 @@ class Project(models.Model):
     modified_date = models.DateTimeField(auto_now=True)
     commands = models.ManyToManyField('Command', blank=True, related_name='aplicacoes')
     remote = models.CharField(max_length=64, default='origin')
-    branch_trunc = models.CharField(max_length=64, default='main')
-    branch_dev = models.CharField(max_length=64, blank=True, null=True)
-    branch_homolog = models.CharField(max_length=64, blank=True, null=True)
-    branch_prod = models.CharField(max_length=64, blank=True, null=True)
+    trunk_branch = models.CharField(max_length=64, default='main')
+    development_branch = models.CharField(max_length=64, blank=True, null=True)
+    homologation_branch = models.CharField(max_length=64, blank=True, null=True)
+    production_branch = models.CharField(max_length=64, blank=True, null=True)
     auto_update = models.BooleanField(default=True, help_text="If enabled, the project will be automatically updated.")
 
     def __str__(self):

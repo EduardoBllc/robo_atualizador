@@ -22,9 +22,6 @@ def build_agent_parser():
     parser.add_argument("-v", "--verbose",
                         action="store_true",
                         help="Enable verbose output.")
-    parser.add_argument("-c", "--config",
-                        type=str,
-                        help="Path to the configuration file.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     for build_subparser in AGENT_SUBPARSERS:

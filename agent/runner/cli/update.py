@@ -4,35 +4,41 @@ def run_update(args):
     from agent.runner.services import update
     from agent.project.models import Project
 
-    q_projects = Q()
+    if project_id := args.project_id:
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            print(f"Project with ID {project_id} does not exist.")
+            return 1
 
-    if args.project_id:
-        q_projects &= Q(id=args.project_id)
+        update(project)
+    else:
+        q_projects = Q()
 
-    if not args.force:
-        q_projects &= Q(auto_update=True)
+        if not args.force:
+            q_projects &= Q(auto_update=True)
 
-    try:
-        for project in Project.objects.filter(q_projects):
-            if args.dry_run or args.verbose:
-                print(f"Updating project ID {project.id} at path {project.path}")
+        try:
+            for project in Project.objects.filter(q_projects):
+                if args.dry_run or args.verbose:
+                    print(f"Updating project ID {project.id} at path {project.path}")
 
-                if args.dry_run:
-                    continue
+                    if args.dry_run:
+                        continue
 
-            if args.branch:
-                if project.active_branch != args.branch:
-                    print(
-                        f'Skipping project ID {project.id} as it is on branch {project.active_branch},'
-                        f' not {args.branch}.'
-                    )
-                    continue
+                if args.branch:
+                    if project.active_branch != args.branch:
+                        print(
+                            f'Skipping project ID {project.id} as it is on branch {project.active_branch},'
+                            f' not {args.branch}.'
+                        )
+                        continue
 
-            update(project)
+                update(project)
 
-    except Exception as e:
-        print(f"Update failed: {e}")
-        return 1
+        except Exception as e:
+            print(f"Update failed: {e}")
+            return 1
 
     print("Update completed successfully.")
     return 0
@@ -58,4 +64,8 @@ def build_update_subparser(subparser):
     p_update.add_argument("--dry-run",
                           action="store_true",
                           help="Perform a dry run without executing the update.")
+    p_update.add_argument("--auto-stash",
+                          action="store_true",
+                          help="Automatically stash local changes before updating.")
+
     p_update.set_defaults(func=run_update)
