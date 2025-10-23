@@ -37,7 +37,7 @@ class ProjectView(APIView):
             project = register_project(serializer)
             status_res = status.HTTP_201_CREATED
             response = {
-                'message': 'Repositório cadastrado com sucesso.',
+                'message': 'Project successfull registered.',
                 'project_id': project.id
             }
 

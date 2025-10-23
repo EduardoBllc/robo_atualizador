@@ -10,6 +10,7 @@ load_dotenv(BASE_DIR / '.env.agent')
 
 INSTALLED_APPS += [
     "agent.project",
+    "agent.project.command",
     "agent.runner",
 ]
 
