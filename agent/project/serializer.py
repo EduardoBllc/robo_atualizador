@@ -20,3 +20,4 @@ class ProjectSerializer(serializers.ModelSerializer):
         repr['active_branch'] = instance.active_branch.name if instance.active_branch else None
 
         return repr
+    

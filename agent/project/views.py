@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from agent.project.models import Project
 from agent.project.serializer import ProjectSerializer
-from agent.project.services import register_project
+from agent.project.services import modify_project, register_project
 
 
 class ProjectView(APIView):
@@ -54,6 +54,30 @@ class ProjectView(APIView):
             status_res = status.HTTP_500_INTERNAL_SERVER_ERROR
 
         return Response(response, status=status_res, content_type='application/json;charset=utf-8')
+    
+    def patch(self, request, *args, **kwargs):
+        data = request.data
+
+        try:
+            assert 'id' in data, 'Project "id" is required'
+            project_id = data['id']
+
+            try:
+                project = Project.objects.get(id=project_id)
+            except Project.DoesNotExist:
+                raise AssertionError(f'Project ID {project_id} not found')
+
+            modified = modify_project(project, data)
+            response_message = 'Project successfull modified' if modified else 'Nothing changed'
+
+            response = {'message': response_message}
+            res_status = status.HTTP_200_OK
+
+        except AssertionError as e:
+            res_status = status.HTTP_400_BAD_REQUEST
+            response = {'error': str(e)}
+
+        return Response(response, status=res_status)
 
 
 class ProjectDetailsView(APIView):
@@ -91,3 +115,24 @@ class ProjectDetailsView(APIView):
             res_status = status.HTTP_500_INTERNAL_SERVER_ERROR
 
         return Response(response, status=res_status, content_type='application/json;charset=utf-8')
+    
+    def patch(self, request, project_id: int, *args, **kwargs):
+        data = request.data.copy()
+
+        try:
+            try:
+                project = get_object_or_404(Project, id=project_id)
+            except Project.DoesNotExist:
+                raise AssertionError(f'Project ID {project_id} not found')
+
+            modified = modify_project(project, data)
+            response_message = 'Project successfull modified' if modified else 'Nothing changed'
+
+            response = {'message': response_message}
+            res_status = status.HTTP_200_OK
+
+        except AssertionError as e:
+            res_status = status.HTTP_400_BAD_REQUEST
+            response = {'error': str(e)}
+
+        return Response(response, status=res_status)
