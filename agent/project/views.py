@@ -68,7 +68,7 @@ class ProjectView(APIView):
                 raise AssertionError(f'Project ID {project_id} not found')
 
             modified = modify_project(project, data)
-            response_message = 'Project successfull modified' if modified else 'Nothing changed'
+            response_message = 'Project successfull updated' if modified else 'Nothing changed'
 
             response = {'message': response_message}
             res_status = status.HTTP_200_OK
@@ -76,6 +76,9 @@ class ProjectView(APIView):
         except AssertionError as e:
             res_status = status.HTTP_400_BAD_REQUEST
             response = {'error': str(e)}
+        except Exception as e:
+            res_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            response = {"error": "An unexpected error occurred.", "details": str(e)}
 
         return Response(response, status=res_status)
 

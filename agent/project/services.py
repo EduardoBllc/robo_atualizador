@@ -39,7 +39,7 @@ def modify_project(project: Project, data: dict):
             raise AssertionError(f'The path "{path}" is not a directory.')
 
         try:
-            repo = git.Repo(path)
+            git.Repo(path)
         except git.exc.InvalidGitRepositoryError:
             raise AssertionError(f'The directory {path} is not a valid git repository.')
 

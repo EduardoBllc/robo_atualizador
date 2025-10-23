@@ -1,8 +1,10 @@
 from django.db import models
 
+
 class Command(models.Model):
-    project = models.ForeignKey('project.Project', on_delete=models.CASCADE, related_name='project')
+    project = models.ForeignKey('project.Project', on_delete=models.CASCADE, related_name='commands')
     command = models.CharField(max_length=300)
+    name = models.CharField(max_length=64)
     description = models.TextField(blank=True, null=True)
     restart_command = models.BooleanField(default=False, help_text='If is enabled, run the command when calls the project\'s restart')
     registered_date = models.DateTimeField(auto_now_add=True)
