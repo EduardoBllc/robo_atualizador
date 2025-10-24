@@ -137,4 +137,7 @@ def update(project: Project, auto_stash: bool = True):
         if did_stash:
             stash_pop(repository)
 
+    if restart_command := project.restart_command:
+        restart_command.execute()
+
     return updated, repository.head.commit

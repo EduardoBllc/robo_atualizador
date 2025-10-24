@@ -46,6 +46,7 @@ class CommandView(APIView):
     def post(self, request, project_id: int, *args, **kwargs):
         from agent.project.models import Project
         from agent.project.command.serializer import CommandSerializer
+        from agent.project.command.services import register_command
 
         try:
             project = get_object_or_404(Project, id=project_id)
@@ -55,7 +56,7 @@ class CommandView(APIView):
 
             serializer = CommandSerializer(data=data)
             serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
+            instance = register_command(serializer)
 
             response = {'message': 'Command created successfully.', 'command_id': instance.id}
             res_status = status.HTTP_200_OK

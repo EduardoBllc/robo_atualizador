@@ -2,8 +2,6 @@ from django.db import models
 import git
 from datetime import datetime
 
-from agent.project.command.models import Command
-
 
 class Project(models.Model):
     name = models.CharField(max_length=100)
@@ -44,4 +42,15 @@ class Project(models.Model):
     @property
     def formatted_actual_commit(self) -> str:
         return f"{self.actual_commit.hexsha[:7]} - {self.actual_commit_date.strftime('%d/%m/%Y')}"
+
+    @property
+    def restart_command(self):
+        from agent.project.command.models import Command
+
+        try:
+            return self.commands.get(restart_command=True)
+        except Command.MultipleObjectsReturned:
+            return self.commands.filter(restart_command=True).first()
+        except Command.DoesNotExist:
+            return None
 
